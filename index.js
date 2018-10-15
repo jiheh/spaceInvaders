@@ -37,11 +37,9 @@ function createInvaders() {
 
       let invader = Invader(`invader${r}-${idx}`, leftLimit, rightLimit, top);
       createInvaderElement(invader.id);
-
       return invader;
     });
   });
-
   drawInvaders();
 }
 
@@ -59,7 +57,6 @@ function createInvaderElement(invaderId) {
       canvas.appendChild(pixel);
     }
   }
-
   main.appendChild(canvas);
 }
 
@@ -82,8 +79,8 @@ function updateInvadersWidth() {
     let velocity = Math.random() < 0.5 ? 50 : -50;
 
     let firstInvader = flatInvaders[0];
-    if (firstInvader.left + velocity > firstInvader.rightLimit
-      || firstInvader.left + velocity < firstInvader.leftLimit) {
+    if (Math.floor(firstInvader.left + velocity) > firstInvader.rightLimit
+      || Math.ceil(firstInvader.left + velocity) < firstInvader.leftLimit) {
       velocity = velocity * -1;
     }
 
@@ -94,18 +91,15 @@ function updateInvadersWidth() {
 }
 
 function updateInvadersHeight() {
-  let flatInvaders = invaders.flat();
+  let velocity = 50;
+  let hasInvaded = false;
 
-  for (let i = 0; i < flatInvaders.length; i++) {
-    let invader = flatInvaders[i];
+  invaders.flat().forEach(invader => {
+    invader.top += velocity;
+    if (invader.top >= window.innerHeight * 0.9 && !hasInvaded) hasInvaded = true;
+  });
 
-    if (invader.top + 50 >= window.innerHeight) {
-      gameOver();
-      break;
-    }
-
-    invader.top += 50;
-  }
+  if (hasInvaded) gameOver();
 }
 
 // Shooter
@@ -130,6 +124,8 @@ function updateShooter(velocity) {
 }
 
 // Game Loop
+let isGameOver = false;
+
 function start() {
   createInvaders();
   mainLoop();
@@ -139,19 +135,17 @@ let frameCount = 1;
 
 function mainLoop() {
   let invaderWidthFrameCount = 40;
-  let invaderHeightFrameCount = 400;
+  let invaderHeightFrameCount = 480;
 
   if (frameCount % invaderWidthFrameCount === 0) updateInvadersWidth();
   if (frameCount % invaderHeightFrameCount === 0) updateInvadersHeight();
+  drawInvaders();
 
   if (!isGameOver) {
-    drawInvaders();
     frameCount++;
     requestAnimationFrame(mainLoop);
   }
 }
-
-let isGameOver = false;
 
 function gameOver() {
   isGameOver = true;
