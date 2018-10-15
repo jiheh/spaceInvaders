@@ -40,6 +40,7 @@ function createInvaders() {
       return invader;
     });
   });
+
   drawInvaders();
 }
 
@@ -57,6 +58,7 @@ function createInvaderElement(invaderId) {
       canvas.appendChild(pixel);
     }
   }
+  
   main.appendChild(canvas);
 }
 
