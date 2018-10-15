@@ -1,0 +1,12 @@
+body {
+  background-color: black;
+}
+
+.invader {
+  color: white;
+  position: absolute;
+}
+
+#shooter {
+  color: white;
+}
