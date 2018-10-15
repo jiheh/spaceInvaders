@@ -1,5 +1,12 @@
 // Invaders
-let invaders = [];
+// Storing indices needed to spell out a word with the invaders
+let invaders = [
+  [2, 4, 6, 8, 10, 11, 12, 14, 16],
+  [2, 4, 6, 8, 10, 14, 16],
+  [2, 4, 6, 7, 8, 10, 11, 12, 14, 15, 16],
+  [0, 2, 4, 6, 8, 10, 14, 16],
+  [0, 1, 2, 4, 6, 8, 10, 11, 12, 14, 16]
+];
 
 function Invader(id, leftLimit, rightLimit, top) {
   return {
@@ -14,38 +21,46 @@ function Invader(id, leftLimit, rightLimit, top) {
 
 function createInvaders() {
   let numRows = 5;
-  let invadersPerRow = 11;
+  let invadersPerRow = 17;
 
-  let heightPadding = window.innerHeight * .05;
+  let heightPadding = window.innerHeight * .1;
   let widthPadding = window.innerWidth * .1;
 
-  let heightDiff = (window.innerHeight - heightPadding * 2) / 3 / numRows;
-  let widthDiff = (window.innerWidth - widthPadding * 2) / 2 / invadersPerRow;
+  let heightDiff = (window.innerHeight - heightPadding * 2) / 2.5 / numRows;
+  let widthDiff = (window.innerWidth - widthPadding * 2) * .7 / invadersPerRow;
 
-  for (let r = 0; r < numRows; r++) {
-    let row = [];
-
-    for (let i = 0; i < invadersPerRow; i++) {
+  invaders = invaders.map((row, r) => {
+    return row.map((i, idx) => {
       let leftLimit = widthDiff * i + widthPadding;
       let rightLimit = window.innerWidth - widthPadding - (widthDiff * (invadersPerRow - i - 1));
       let top = heightDiff * r + heightPadding;
 
-      let invader = Invader(`invader${r}-${i}`, leftLimit, rightLimit, top);
-      row.push(invader);
+      let invader = Invader(`invader${r}-${idx}`, leftLimit, rightLimit, top);
       createInvaderElement(invader.id);
-    }
-    invaders.push(row);
-  }
+
+      return invader;
+    });
+  });
+
   drawInvaders();
 }
 
 let main = document.getElementById('main');
+
 function createInvaderElement(invaderId) {
-  let div = document.createElement('div');
-  div.id = invaderId;
-  div.className = 'invader';
-  div.innerHTML = '+_+';
-  main.appendChild(div);
+  let canvas = document.createElement('div');
+  canvas.className = 'invader-canvas';
+  canvas.id = invaderId;
+
+  for (let row = 0; row < 8; row++) {
+    for (let p = 0; p < 11; p++) {
+      let pixel = document.createElement('div');
+      pixel.className = 'invader-pixel';
+      canvas.appendChild(pixel);
+    }
+  }
+
+  main.appendChild(canvas);
 }
 
 function drawInvaders() {
@@ -60,11 +75,12 @@ function drawInvaders() {
   });
 }
 
-let velocity = 50;
-function updateInvaders() {
+function updateInvadersWidth() {
   let flatInvaders = invaders.flat();
 
   if (flatInvaders.length) {
+    let velocity = Math.random() < 0.5 ? 50 : -50;
+
     let firstInvader = flatInvaders[0];
     if (firstInvader.left + velocity > firstInvader.rightLimit
       || firstInvader.left + velocity < firstInvader.leftLimit) {
@@ -77,6 +93,42 @@ function updateInvaders() {
   }
 }
 
+function updateInvadersHeight() {
+  let flatInvaders = invaders.flat();
+
+  for (let i = 0; i < flatInvaders.length; i++) {
+    let invader = flatInvaders[i];
+
+    if (invader.top + 50 >= window.innerHeight) {
+      gameOver();
+      break;
+    }
+
+    invader.top += 50;
+  }
+}
+
+// Shooter
+let shooterPosition = 0;
+
+document.addEventListener('keydown', event => {
+  let shooterVelocity = 15;
+  if (event.key === 'ArrowRight') {
+    updateShooter(shooterVelocity);
+  } else if (event.key === 'ArrowLeft') {
+    updateShooter(-shooterVelocity);
+  }
+});
+
+function updateShooter(velocity) {
+  if (shooterPosition + velocity < (window.innerWidth * .91) && shooterPosition + velocity > 0) {
+    shooterPosition += velocity;
+  }
+
+  let shooter = document.getElementById('shooter');
+  shooter.style.left = shooterPosition + 'px';
+}
+
 // Game Loop
 function start() {
   createInvaders();
@@ -84,15 +136,29 @@ function start() {
 }
 
 let frameCount = 1;
-function mainLoop() {
-  let invaderAnimationFrameCount = 30;
-  if (frameCount % invaderAnimationFrameCount === 0) {
-    updateInvaders();
-    drawInvaders();
-  }
 
-  frameCount++;
-  requestAnimationFrame(mainLoop);
+function mainLoop() {
+  let invaderWidthFrameCount = 40;
+  let invaderHeightFrameCount = 400;
+
+  if (frameCount % invaderWidthFrameCount === 0) updateInvadersWidth();
+  if (frameCount % invaderHeightFrameCount === 0) updateInvadersHeight();
+
+  if (!isGameOver) {
+    drawInvaders();
+    frameCount++;
+    requestAnimationFrame(mainLoop);
+  }
+}
+
+let isGameOver = false;
+
+function gameOver() {
+  isGameOver = true;
+  let gameOverSign = document.createElement('div');
+  gameOverSign.id = 'game-over';
+  gameOverSign.innerHTML = 'GAME OVER';
+  main.appendChild(gameOverSign);
 }
 
 start();
