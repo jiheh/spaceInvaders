@@ -3,13 +3,20 @@ body {
 }
 
 #shooter {
-  background: #39FF14;
+  background: #39ff14;
   position: absolute;
   width: 9%;
   height: 2.5%;
   bottom: 0px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+}
+
+.bullets {
+  position: absolute;
+  background: white;
+  height: 4px;
+  width: 4px;
 }
 
 .invader-canvas {
@@ -74,8 +81,15 @@ body {
 }
 
 #game-over {
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   font-size: 5em;
   color: red;
+  text-align: center;
+}
+
+#game-won {
+  font-family: "Press Start 2P", cursive;
+  font-size: 5em;
+  color: green;
   text-align: center;
 }
