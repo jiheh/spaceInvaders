@@ -58,7 +58,7 @@ function createInvaderElement(invaderId) {
       canvas.appendChild(pixel);
     }
   }
-  
+
   main.appendChild(canvas);
 }
 
@@ -97,8 +97,10 @@ function updateInvadersHeight() {
   let hasInvaded = false;
 
   invaders.flat().forEach(invader => {
-    invader.top += velocity;
-    if (invader.top >= window.innerHeight * 0.9 && !hasInvaded) hasInvaded = true;
+    if (invader.isAlive) {
+      invader.top += velocity;
+      if (invader.top >= window.innerHeight * 0.9 && !hasInvaded) hasInvaded = true;
+    }
   });
 
   if (hasInvaded) gameOver();
@@ -106,6 +108,7 @@ function updateInvadersHeight() {
 
 // Shooter
 let shooterPosition = 0;
+let bullets = [];
 
 document.addEventListener('keydown', event => {
   let shooterVelocity = 15;
@@ -113,6 +116,8 @@ document.addEventListener('keydown', event => {
     updateShooter(shooterVelocity);
   } else if (event.key === 'ArrowLeft') {
     updateShooter(-shooterVelocity);
+  } else if (event.key === ' ') {
+    createBullet();
   }
 });
 
@@ -123,6 +128,53 @@ function updateShooter(velocity) {
 
   let shooter = document.getElementById('shooter');
   shooter.style.left = shooterPosition + 'px';
+}
+
+let bulletCounter = 0;
+
+function createBullet() {
+  let bulletId = `bullet${bulletCounter}`;
+  let bullet = {
+    id: bulletId,
+    left: shooterPosition,
+    top: window.innerHeight
+  };
+
+  bullets.push(bullet);
+
+  let bulletElement = document.createElement('div');
+  bulletElement.className = 'bullets';
+  bulletElement.id = bulletId;
+  main.appendChild(bulletElement);
+
+  bulletCounter++;
+}
+
+function drawBullets() {
+  bullets.forEach(bullet => {
+    let div = document.getElementById(bullet.id);
+    div.style.left = `${bullet.left}px`;
+    div.style.top = `${bullet.top}px`;
+  });
+}
+
+function updateBullets() {
+  bullets.forEach(bullet => {
+    bullet.top -= 10;
+  });
+
+  invaders.flat().forEach(invader => {
+    bullets.forEach(bullet => {
+      if (
+        bullet.top <= invader.top &&
+        bullet.top >= invader.top - 36 &&
+        bullet.left >= invader.left &&
+        bullet.left <= invader.left + 33
+      ) {
+        invader.isAlive = false;
+      }
+    });
+  });
 }
 
 // Game Loop
@@ -137,11 +189,18 @@ let frameCount = 1;
 
 function mainLoop() {
   let invaderWidthFrameCount = 40;
-  let invaderHeightFrameCount = 480;
+  let invaderHeightFrameCount = 320;
 
   if (frameCount % invaderWidthFrameCount === 0) updateInvadersWidth();
   if (frameCount % invaderHeightFrameCount === 0) updateInvadersHeight();
   drawInvaders();
+
+  if (bullets.length) {
+    updateBullets();
+    drawBullets();
+  }
+
+  if (!invaders.flat().filter(i => i.isAlive).length) gameWon();
 
   if (!isGameOver) {
     frameCount++;
@@ -157,4 +216,19 @@ function gameOver() {
   main.appendChild(gameOverSign);
 }
 
+function gameWon() {
+  isGameOver = true;
+  let gameWonSign = document.createElement('div');
+  gameWonSign.id = 'game-won';
+  gameWonSign.innerHTML = 'YOU WIN!';
+  main.appendChild(gameWonSign);
+}
+
 start();
+
+// TODO:
+// Fix update function to kill invader if top and left/right within invader's area
+// Remove bullets that have killed
+// Remove bullets that have gone offscreen
+// Fix update to add to score on kill
+// Draw scoreboard on every frame

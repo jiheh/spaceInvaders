@@ -12,6 +12,13 @@ body {
   border-top-right-radius: 15px;
 }
 
+.bullets {
+  position: absolute;
+  background: white;
+  height: 4px;
+  width: 2px;
+}
+
 .invader-canvas {
   position: absolute;
   width: 33px;
@@ -77,5 +84,12 @@ body {
   font-family: 'Press Start 2P', cursive;
   font-size: 5em;
   color: red;
+  text-align: center;
+}
+
+#game-won {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 5em;
+  color: green;
   text-align: center;
 }
