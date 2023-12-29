@@ -210,6 +210,8 @@ function removeBullet(bullet) {
 let isGameOver = false;
 
 function start() {
+  main.removeChild(document.getElementById("click-to-start"));
+
   createInvaders();
   mainLoop();
 }
@@ -255,7 +257,16 @@ function gameWon() {
   main.appendChild(gameWonSign);
 }
 
-start();
+function clickToStart() {
+  let clickToStartSign = document.createElement("div");
+  clickToStartSign.id = "click-to-start";
+  clickToStartSign.innerHTML = "> Click to Start <";
+  main.appendChild(clickToStartSign);
+
+  document.addEventListener("click", start, {once: true});
+}
+
+clickToStart();
 
 // TODO:
 // Fix update function to kill invader if top and left/right within invader's area
